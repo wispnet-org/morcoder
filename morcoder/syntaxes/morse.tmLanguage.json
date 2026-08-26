@@ -1,0 +1,22 @@
+{
+  "name": "Morse",
+  "scopeName": "source.morse",
+  "patterns": [
+    {
+      "match": "#.*$",
+      "name": "comment.line.number-sign.morse"
+    },
+    {
+      "match": "\\.",
+      "name": "constant.language.morse.dit"
+    },
+    {
+      "match": "-",
+      "name": "keyword.operator.morse.dah"
+    },
+    {
+      "match": "/",
+      "name": "punctuation.separator.morse.word"
+    }
+  ]
+}
