@@ -1,13 +1,28 @@
 {
   "name": "morcoder",
   "displayName": "morcoder",
-  "description": "A morse code syntax highlighter.",
-  "version": "0.0.1",
+  "description": "A Morse code syntax highlighter.",
+  "version": "0.1.0",
+  "publisher": "wispnet",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wispnet-org/morcoder.git"
+  },
+  "icon": "images/icon.png",
   "engines": {
     "vscode": "^1.134.0"
   },
   "categories": [
-    "Other"
+    "Programming Languages"
+  ],
+  "keywords": [
+  "morse",
+  "morse code",
+  "ham radio",
+  "amateur radio",
+  "syntax highlighting",
+  "syntax highlighter",
+  "telegraphy"
   ],
   "activationEvents": [
     "onLanguage:morse"
@@ -30,8 +45,8 @@
   ],
   "commands": [
     {
-      "command": "morcoder.helloWorld",
-      "title": "Hello World"
+      "command": "morcoder.helloSam",
+      "title": "Hello Morse"
     }
     ]
   },

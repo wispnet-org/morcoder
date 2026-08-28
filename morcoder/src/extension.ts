@@ -89,6 +89,16 @@ export function activate(context: vscode.ExtensionContext) {
             }
         })
     );
+
+    const disposable = vscode.commands.registerCommand(
+        'morcoder.helloSam',
+        () => {
+            vscode.window.showInformationMessage('If it isn\'t Samuel Morse... ');
+        }
+    );
+
+    context.subscriptions.push(disposable);
+
 }
 
 function updateDocument(document: vscode.TextDocument) {
