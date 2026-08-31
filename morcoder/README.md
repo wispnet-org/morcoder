@@ -11,8 +11,11 @@ The **`morcoder`** is designed to highlight invalid Morse code, invalid Morse sy
 - Gives errors for invalid Morse code.
 - Gives warnings for non-Morse characters.
 
+##### Example:
+Hovering over `....` displays `H`.
+Invalid morse such as `.--.-.---.`, etc. will be highlighted as errors.
 #### Filetypes
-Recognizes the `.Morse`, `.morc`, and `.mor` filetypes as Morse code files.
+Recognizes the `.morse`, `.morc`, and `.mor` filetypes as Morse code files.
 #### Recognized Character Set
 A limited subset of the ITU Standard:
 - A-Z
