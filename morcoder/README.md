@@ -30,8 +30,6 @@ Found one? Report it on [GitHub](https://github.com/wispnet-org/morcoder/issues/
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
-
 ### 0.1.0
 
 Initial public release of **`morcoder`**.
