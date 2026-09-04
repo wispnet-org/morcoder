@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { parseMorse } from './parser';
 import { morseToCharacter } from './morse';
+import { decodeMorse } from './translator';
 import {
     initializeStatusBar,
     updateStatusBar,
@@ -48,27 +49,22 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.languages.registerHoverProvider("morse", {
             provideHover(document, position) {
-                const morseRange = document.getWordRangeAtPosition(
-                    position,
-                    /[.-]+/
+                const morseRange = getMorseWordRange(
+                    document,
+                    position
                 );
 
                 if (morseRange) {
                     const morse = document.getText(morseRange);
-                    const character = morseToCharacter[morse];
-
-                    if (!character) {
-                        return new vscode.Hover(
-                            `\`${morse}\` is not a recognized Morse character.`,
-                            morseRange
-                        );
-                    }
+                    const decoded = decodeMorse(morse);
 
                     return new vscode.Hover(
-                        `**${character}**\n\nMorse: \`${morse}\``,
+                        `**${decoded}**\n\nMorse: \`${morse}\``,
                         morseRange
                     );
                 }
+
+
 
                 const invalidRange = document.getWordRangeAtPosition(
                     position,
@@ -123,3 +119,35 @@ function updateDocument(document: vscode.TextDocument) {
 export function deactivate() {
     diagnostics.dispose();
 }
+
+function getMorseWordRange(
+    document: vscode.TextDocument,
+    position: vscode.Position
+): vscode.Range | undefined {
+    const line = document.lineAt(position.line);
+    const text = line.text;
+    const cursor = position.character;
+
+    if (cursor >= text.length || !/[.-]/.test(text[cursor])) {
+        return undefined;
+    }
+
+    const slash = text.lastIndexOf("/", cursor);
+    const nextSlash = text.indexOf("/", cursor);
+
+    const start = slash === -1 ? 0 : slash + 1;
+    const end = nextSlash === -1 ? text.length : nextSlash;
+
+    if (start >= end) {
+        return undefined;
+    }
+
+    return new vscode.Range(
+        position.line,
+        start,
+        position.line,
+        end
+    );
+}
+
+
