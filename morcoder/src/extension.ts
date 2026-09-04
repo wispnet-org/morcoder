@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { parseMorse } from './parser';
-import { morseToCharacter } from './morse';
+// import { morseToCharacter } from './morse';
 import { decodeMorse } from './translator';
 import {
     initializeStatusBar,
@@ -47,44 +47,53 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     context.subscriptions.push(
-        vscode.languages.registerHoverProvider("morse", {
-            provideHover(document, position) {
-                const morseRange = getMorseWordRange(
-                    document,
-                    position
+    vscode.languages.registerHoverProvider("morse", {
+        provideHover(document, position) {
+            const result = parseMorse(document);
+
+            const morseWord = result.words.find(word =>
+                word.range.contains(position)
+            );
+
+            if (morseWord) {
+                const decoded = decodeMorse(morseWord.morse);
+
+                return new vscode.Hover(
+                    `**${decoded}**\n\nMorse: \`${morseWord.morse}\``,
+                    morseWord.range
                 );
-
-                if (morseRange) {
-                    const morse = document.getText(morseRange);
-                    const decoded = decodeMorse(morse);
-
-                    return new vscode.Hover(
-                        `**${decoded}**\n\nMorse: \`${morse}\``,
-                        morseRange
-                    );
-                }
-
-
-
-                const invalidRange = document.getWordRangeAtPosition(
-                    position,
-                    /[^.\-\/\s]+/
-                );
-
-                if (invalidRange) {
-                    const invalidText = document.getText(invalidRange);
-
-                    return new vscode.Hover(
-                        `\`${invalidText}\` isn't valid Morse syntax.` +
-                        ` Did you mean to add a comment?\n\n` +
-                        `Use \`#\`:\n\n` +
-                        `\`# ${invalidText}\``,
-                        invalidRange
-                    );
-                }
             }
-        })
-    );
+
+            const line = document.lineAt(position.line);
+            const commentIndex = line.text.indexOf("#");
+
+            // Don't provide invalid-syntax hovers inside comments.
+            if (
+                commentIndex !== -1 &&
+                position.character >= commentIndex
+            ) {
+                return undefined;
+            }
+
+            const invalidRange = document.getWordRangeAtPosition(
+                position,
+                /[^.\-\/\s#]+/
+            );
+
+            if (invalidRange) {
+                const invalidText = document.getText(invalidRange);
+
+                return new vscode.Hover(
+                    `\`${invalidText}\` isn't valid Morse syntax.` +
+                    ` Did you mean to add a comment?\n\n` +
+                    `Use \`#\`:\n\n` +
+                    `\`# ${invalidText}\``,
+                    invalidRange
+                );
+            }
+        }
+    })
+);
 
     const disposable = vscode.commands.registerCommand(
         'morcoder.helloSam',
@@ -119,35 +128,4 @@ function updateDocument(document: vscode.TextDocument) {
 export function deactivate() {
     diagnostics.dispose();
 }
-
-function getMorseWordRange(
-    document: vscode.TextDocument,
-    position: vscode.Position
-): vscode.Range | undefined {
-    const line = document.lineAt(position.line);
-    const text = line.text;
-    const cursor = position.character;
-
-    if (cursor >= text.length || !/[.-]/.test(text[cursor])) {
-        return undefined;
-    }
-
-    const slash = text.lastIndexOf("/", cursor);
-    const nextSlash = text.indexOf("/", cursor);
-
-    const start = slash === -1 ? 0 : slash + 1;
-    const end = nextSlash === -1 ? text.length : nextSlash;
-
-    if (start >= end) {
-        return undefined;
-    }
-
-    return new vscode.Range(
-        position.line,
-        start,
-        position.line,
-        end
-    );
-}
-
 

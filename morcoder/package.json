@@ -2,7 +2,7 @@
   "name": "morcoder",
   "displayName": "morcoder",
   "description": "A Morse code syntax highlighter.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "wispnet",
   "repository": {
     "type": "git",

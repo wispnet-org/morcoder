@@ -1,14 +1,21 @@
 import * as vscode from 'vscode';
 import { morseToCharacter } from './morse';
 
+export interface MorseWord {
+    range: vscode.Range;
+    morse: string;
+}
+
 export interface MorseParseResult {
     characterCount: number;
     wordCount: number;
     diagnostics: vscode.Diagnostic[];
+    words: MorseWord[];
 }
 
 export function parseMorse(document: vscode.TextDocument): MorseParseResult {
     const diagnostics: vscode.Diagnostic[] = [];
+    const words: MorseWord[] = [];
 
     let characterCount = 0;
     let wordCount = 0;
@@ -25,7 +32,7 @@ export function parseMorse(document: vscode.TextDocument): MorseParseResult {
             : text.substring(0, commentIndex);
 
         // Check for invalid characters.
-        const invalidPattern = /[^.\-\/\s]+/g;
+        const invalidPattern = /[^.\-\/\s#]+/g;
         let invalidMatch: RegExpExecArray | null;
 
         while ((invalidMatch = invalidPattern.exec(code)) !== null) {
@@ -67,7 +74,7 @@ export function parseMorse(document: vscode.TextDocument): MorseParseResult {
                 diagnostics.push(
                     new vscode.Diagnostic(
                         range,
-                        `Unknown Morse sequence: ${character}`,
+                        `Unknown Morse sequence: \"${character}\"`,
                         vscode.DiagnosticSeverity.Error
                     )
                 );
@@ -116,23 +123,35 @@ export function parseMorse(document: vscode.TextDocument): MorseParseResult {
                 );
             }
         }
+
+        // Find Morse words.
+        const wordPattern = /[.-]+(?:\s+[.-]+)*/g;
+        let wordMatch: RegExpExecArray | null;
+
+        while ((wordMatch = wordPattern.exec(code)) !== null) {
+            const morse = wordMatch[0];
+            const start = wordMatch.index;
+
+            const range = new vscode.Range(
+                lineNumber,
+                start,
+                lineNumber,
+                start + morse.length
+            );
+
+            words.push({
+                range,
+                morse
+            });
+        }
     }
 
-    const codeText = Array.from(
-    { length: document.lineCount },
-    (_, i) => document.lineAt(i).text.split("#")[0]
-).join("\n");
-
-const words = codeText
-    .split(/[/\n]+/)
-    .filter(word => /[.-]/.test(word));
-
-wordCount = words.length;
-
+    wordCount = words.length;
 
     return {
         characterCount,
         wordCount,
-        diagnostics
+        diagnostics,
+        words
     };
 }

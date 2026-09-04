@@ -1,9 +1,9 @@
 import { morseToCharacter } from "./morse";
 
 export function decodeMorse(morse: string): string {
-    const characters = morse.split(" ");
+    const characters = morse.trim().split(/\s+/);
     const translatedCharacters = characters.map(
-    character => morseToCharacter[character]
+    character => morseToCharacter[character] ?? "�"
 );
 
 
